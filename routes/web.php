@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,10 +14,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::get('/posts', function () {
+    return view('posts.index');   // resources/views/posts/index.blade.php
 });
+
+Route::get('/posts/create', function () {
+    return view('posts.create');  // resources/views/posts/create.blade.php
+});
+
+Route::get('/posts/edit', function () {
+    return view('posts.edit');  // resources/views/posts/create.blade.php
+});
+
+Route::get('/posts/show', function () {
+    return view('posts.show');  // resources/views/posts/create.blade.php
+});
+
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
