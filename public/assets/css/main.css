@@ -1,0 +1,327 @@
+:root {
+    /* Color palette：ソーダ×ミント×レモン */
+    --bg: #f7fbff; /* さっぱり薄空色 */
+    --card: #ffffff; /* カード白 */
+    --ink: #2f3342; /* 本文テキスト */
+    --muted: #7a7f8c;
+    --primary: #5fd0ff; /* ソーダ */
+    --primary-600: #41c4fb;
+    --primary-700: #27b7f5;
+    --accent: #aaf0d1; /* ミント */
+    --accent-2: #fff1a8; /* レモン */
+    --ring: rgba(95, 208, 255, 0.35);
+    --shadow: 0 10px 26px rgba(64, 196, 251, 0.18);
+    --radius-xl: 22px;
+    --radius-lg: 14px;
+}
+
+/* -----------------------------
+   ベース
+------------------------------ */
+html,
+body {
+    background: radial-gradient(
+                20px 20px at 12% 18%,
+                rgba(95, 208, 255, 0.12) 0 60%,
+                transparent 61%
+            )
+            no-repeat,
+        radial-gradient(
+                20px 20px at 85% 30%,
+                rgba(170, 240, 209, 0.16) 0 60%,
+                transparent 61%
+            )
+            no-repeat,
+        radial-gradient(
+                22px 22px at 15% 85%,
+                rgba(255, 241, 168, 0.14) 0 60%,
+                transparent 61%
+            )
+            no-repeat;
+    background-color: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    /* font-family: 'Zen Maru Gothic', system-ui, -apple-system, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif; */
+    letter-spacing: 0.01em;
+}
+
+/* -----------------------------
+   ヘッダー
+------------------------------ */
+header {
+    background: linear-gradient(180deg, #ffffff 0%, #f0fbff 100%);
+    border-bottom: 1px dashed rgba(95, 208, 255, 0.35) !important;
+}
+
+.logo {
+    height: 38px;
+    width: auto;
+    filter: drop-shadow(0 2px 0 rgba(95, 208, 255, 0.25));
+}
+
+.header-right nav a {
+    color: var(--primary-600);
+    text-decoration: none;
+    font-weight: 700;
+}
+.header-right nav a:hover {
+    color: var(--primary-700);
+    text-decoration: underline wavy var(--primary-700) 1.5px;
+}
+
+/* -----------------------------
+   見出し・テキスト
+------------------------------ */
+.h4 {
+    font-weight: 800;
+    display: inline-block;
+    position: relative;
+    padding-left: 0.7em;
+}
+.h4::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.46em;
+    height: 1.25em;
+    background: linear-gradient(180deg, var(--primary), #d7f2ff);
+    border-radius: 8px;
+}
+
+.text-muted {
+    color: var(--muted) !important;
+}
+
+/* -----------------------------
+   カード
+------------------------------ */
+.card {
+    border: 0;
+    border-radius: var(--radius-xl);
+    background: var(--card);
+    box-shadow: var(--shadow);
+}
+.card-body {
+    padding: 2rem 2rem 2.25rem;
+}
+
+/* -----------------------------
+   フォーム
+------------------------------ */
+.form-label {
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.form-control {
+    border-radius: var(--radius-lg);
+    border: 1.5px solid #d8eefb;
+    background-color: #fff;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease,
+        transform 0.04s ease;
+}
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 6px var(--ring);
+    outline: none;
+}
+
+/* file input（モダンブラウザ） */
+input[type="file"] {
+    padding: 0.48rem 0.6rem;
+}
+input[type="file"]::file-selector-button {
+    margin-right: 0.8rem;
+    border: 0;
+    border-radius: 999px;
+    padding: 0.55rem 0.95rem;
+    background: linear-gradient(180deg, var(--accent), #dffaea);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.06s ease, filter 0.2s ease;
+}
+input[type="file"]::file-selector-button:hover {
+    filter: brightness(1.05);
+}
+input[type="file"]::file-selector-button:active {
+    transform: translateY(1px);
+}
+
+.form-text {
+    color: var(--muted);
+}
+
+/* エラーメッセージの下マージン微調整（Bootstrapと干渉しにくく） */
+.is-invalid ~ .invalid-feedback {
+    margin-top: 0.35rem;
+}
+
+/* -----------------------------
+   ボタン
+------------------------------ */
+.btn {
+    border-radius: 999px;
+    font-weight: 800;
+    padding: 0.62rem 1.15rem;
+    transition: transform 0.06s ease, box-shadow 0.15s ease, filter 0.2s ease;
+}
+
+.btn-success {
+    /* 「投稿する」：さわやかソーダグラデ＋ミントの影 */
+    background: linear-gradient(180deg, var(--primary), var(--primary-600));
+    border: none;
+    box-shadow: 0 6px 16px rgba(64, 196, 251, 0.28);
+}
+.btn-success:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 8px 22px rgba(64, 196, 251, 0.36);
+}
+.btn-success:active {
+    transform: translateY(1px);
+}
+
+.btn-outline-secondary {
+    border: 2px dashed #dbe7ef;
+    color: #5e6b78;
+    background: #fff;
+}
+.btn-outline-secondary:hover {
+    background: #f5fbff;
+    border-color: #cfe1ec;
+}
+
+/* -----------------------------
+   アラート
+------------------------------ */
+.alert {
+    border-radius: var(--radius-lg);
+    border: 0;
+}
+.alert-danger {
+    background: #ffe7ed;
+    color: #6d2338;
+}
+.alert-success {
+    background: #e9fff5;
+    color: #1e5a36;
+}
+
+/* ハート風のドットで可愛げを少しだけ */
+.alert-danger ul {
+    list-style: none;
+    padding-left: 0;
+}
+.alert-danger li {
+    position: relative;
+    padding-left: 1.15em;
+}
+.alert-danger li::before {
+    content: "❤";
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    font-size: 0.9em;
+    color: #ff85a2;
+}
+
+/* -----------------------------
+   レイアウト余白
+------------------------------ */
+.container.my-5 {
+    margin-top: 2.4rem !important;
+    margin-bottom: 2.8rem !important;
+}
+.row.justify-content-center {
+    gap: 0.75rem 0;
+}
+
+/* -----------------------------
+   フッター
+------------------------------ */
+footer {
+    background: linear-gradient(180deg, #f0fbff, #ffffff);
+    border-top: 1px dashed rgba(95, 208, 255, 0.25);
+    font-size: 0.95rem;
+}
+
+/* -----------------------------
+   ささやかなモーション
+------------------------------ */
+@keyframes bob {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+.btn-success:hover {
+    animation: bob 1.2s ease-in-out infinite;
+}
+
+/* フォーカスリング：アクセシブルに */
+a:focus-visible,
+button:focus-visible,
+.form-control:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 6px var(--ring);
+    border-color: var(--primary);
+}
+
+/* -----------------------------
+   ダークモード（OS設定に追随・控えめ）
+------------------------------ */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0e1722;
+        --card: #0f1a26;
+        --ink: #e7ecf2;
+        --muted: #9aa7b7;
+        --shadow: 0 10px 26px rgba(22, 38, 52, 0.6);
+    }
+    header,
+    footer {
+        background: linear-gradient(180deg, #0f1a26, #0e1722);
+    }
+    .card {
+        background: var(--card);
+    }
+    .form-control {
+        background: #0c1520;
+        border-color: #1e2b3a;
+        color: var(--ink);
+    }
+    .btn-outline-secondary {
+        color: #d7e6f5;
+        border-color: #2b3a4a;
+        background: #0c1520;
+    }
+    .alert-danger {
+        background: #3a1e28;
+        color: #ffdbe5;
+    }
+    .alert-success {
+        background: #1a2f25;
+        color: #dcffe9;
+    }
+}
+
+/* -----------------------------
+   レスポンシブ微調整
+------------------------------ */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.25rem 1rem 1.5rem;
+    }
+    .h4 {
+        font-size: 1.12rem;
+    }
+    .header-left .logo {
+        height: 32px;
+    }
+}
