@@ -3,48 +3,35 @@
 
     <main class="container my-5">
         <div class="row justify-content-center">
-            <div class="col-lg-10">
+            <div class="col-lg-9">
                 <div class="card">
                     <div class="card-body">
 
-                        <h1 class="h4 mb-3">画像を投稿する</h1>
-                        <p class="text-muted mb-4">JPEG / PNG / WEBP / GIF（最大 5MB/枚）。複数選択可。</p>
+                        @php
+                            // UIのみ（仮データ）
+                            $title = 'デモ投稿タイトル';
+                            $body  = 'これはデモ本文です。ここに投稿の説明やメモを表示します。UIプレビュー用の仮テキストです。';
+                            $image = 'https://placehold.co/1200x800?text=Demo+Image';
+                        @endphp
 
-                        <form method="POST" action="" enctype="multipart/form-data" class="mb-3">
-                            @csrf
+                        <div class="mx-auto" style="max-width: 720px;">
+                            <h1 class="h4 mb-3">{{ $title }}</h1>
+                            <p class="mb-3 text-muted">{{ $body }}</p>
+                            <img src="{{ $image }}" class="card-img-top mb-3" alt="demo image"
+                                 loading="lazy" style="object-fit:cover; max-height:80vh;">
+                        </div>
 
-                            <div class="mb-3">
-                                <label for="title" class="form-label">タイトル（任意）</label>
-                                <input type="text" id="title" name="title" class="form-control"
-                                    placeholder="アルバム名やメモなど">
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="" class="btn btn-outline-secondary">戻る</a>
+                            <div>
+                                <a href="" class="btn btn-primary me-2">編集</a>
+                                <form action="" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('本当に削除しますか？');">削除</button>
+                                </form>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="images" class="form-label">画像ファイル</label>
-                                <input type="file" id="images" name="images[]" class="form-control" accept="image/*"
-                                    multiple required>
-                                <div class="form-text">複数枚をまとめて選択できます。</div>
-                            </div>
-
-                            <button type="submit" class="btn btn-success">投稿する</button>
-                            <button type="reset" class="btn btn-outline-secondary">リセット</button>
-                        </form>
-
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        @if (session('status'))
-                            <div class="alert alert-success mt-3">
-                                {{ session('status') }}
-                            </div>
-                        @endif
+                        </div>
 
                     </div>
                 </div>
