@@ -93,7 +93,9 @@
                                         class="badge text-bg-secondary align-middle ms-1">0</span>
                                 </button>
 
-                                <button class="btn btn-sm btn-outline-secondary" disabled>♡ いいね（デモ）</button>
+                                <button class="like-btn btn btn-sm {{ $post->bookmarks->contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
+                                data-post-id="{{ $post->id }}">♡ <span class="like-count">{{ $post->bookmarks->count() }}</span>
+                                </button>
                             </div>
 
                             {{-- コメント欄（折りたたみ） --}}
@@ -194,4 +196,39 @@
             }
         })();
     </script> --}}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".like-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    const postId = btn.dataset.postId;
+                    const countSpan = btn.querySelector(".like-count");
+                    const liked = btn.classList.contains("btn-danger");
+                    const url = liked
+                        ? `/posts/${postId}/bookmark`
+                        : `/posts/${postId}/bookmark`;
+
+                    fetch(url, {
+                        method: liked ? "DELETE" : "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                            "Accept": "application/json",
+                        },
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        countSpan.textContent = data.count;
+
+                        if (liked) {
+                            btn.classList.remove("btn-danger");
+                            btn.classList.add("btn-outline-secondary");
+                        } else {
+                            btn.classList.remove("btn-outline-secondary");
+                            btn.classList.add("btn-danger");
+                        }
+                    });
+                });
+            });
+        });
+
+    </script>
 @endsection

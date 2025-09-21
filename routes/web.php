@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\BookmarkController;
+use App\Models\Bookmark;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,3 +38,7 @@ Route::get('/posts/edit/{id}', [PostController::class, 'edit'])->name('posts.edi
 Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
 
 Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+Route::post('/posts/{id}/bookmark', [BookmarkController::class, 'store'])->name('posts.like');
+
+Route::delete('/posts/{id}/bookmark', [BookmarkController::class, 'destroy'])->name('posts.unlike');
