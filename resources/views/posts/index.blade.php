@@ -6,13 +6,13 @@
             <div class="input-group">
                 <span class="input-group-text">🔎</span>
                 <input type="search" name="q" value="{{ request('q') }}" class="form-control"
-                    placeholder="キーワードで探す（例：カフェ、ラン）">
+                    placeholder="キーワードで探す（投稿者名、タイトル　など）">
             </div>
         </div>
 
         {{-- 並び替え（新しい順をデフォルト表示） --}}
         <div class="col-6 col-md-auto">
-            <select name="sort" class="form-select">
+            <select name="sort" class="form-select" onchange="this.form.submit()">
                 <option value="new" {{ request('sort', 'new') === 'new' ? 'selected' : '' }}>新しい順</option>
                 <option value="old" {{ request('sort') === 'old' ? 'selected' : '' }}>古い順</option>
             </select>
@@ -56,7 +56,7 @@
                                 <li><a class="dropdown-item" href="{{ route('posts.edit', $post) }}">編集</a></li>
                                 <li>
                                     <form action="{{ route('posts.destroy', $post) }}" method="POST"
-                                      onsubmit="return confirm('削除してよろしいですか？')">
+                                    onsubmit="return confirm('削除してよろしいですか？')">
                                     @csrf
                                     @method('DELETE')
                                         <button type="submit" class="dropdown-item text-danger">削除</button>

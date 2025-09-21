@@ -14,9 +14,28 @@ class PostController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+
+
+    public function index(Request $request)
     {
-        $posts = Post::all();
+        $keyword = $request->input('q');
+        $sort = $request->input('sort', 'new');
+
+        $posts = Post::query()
+            ->when($keyword, function ($q) use ($keyword) {
+                $q->where(function ($query) use ($keyword) {
+                    $query->where('title', 'like', '%' . $keyword . '%')
+                        ->orWhere('body', 'like', '%' . $keyword . '%')
+                        ->orWhereHas('user', function ($q2) use ($keyword) {
+                            $q2->where('name', 'like', '%' . $keyword . '%');
+                        });
+                });
+            })
+            ->when($sort === 'old', fn($q) => $q->orderBy('updated_at', 'asc'),
+                                fn($q) => $q->orderBy('updated_at', 'desc'))
+            ->get();
+
+        // ビューに渡す
         return view('posts.index', ['posts' => $posts]);
     }
 
