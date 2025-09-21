@@ -79,6 +79,39 @@
                         @endif
                         <p class="card-text">{{ $post->body }}</p>
                     </div>
+
+                    {{-- アクション行：コメントボタンで入力欄を開閉 --}}
+                            <div class="d-flex align-items-center gap-3">
+                                {{-- <a href="#" class="btn btn-sm btn-outline-primary disabled" tabindex="-1"
+                                    aria-disabled="true">詳細を見る（デモ）</a> --}}
+
+                                {{-- コメントボタン（件数バッジ付き） --}}
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
+                                     aria-expanded="false"
+                                    >
+                                    💬 コメント <span
+                                        class="badge text-bg-secondary align-middle ms-1">0</span>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-secondary" disabled>♡ いいね（デモ）</button>
+                            </div>
+
+                            {{-- コメント欄（折りたたみ） --}}
+                            <div  class="collapse mt-3">
+                                {{-- 既存コメント一覧（デモでは空から） --}}
+                                <ul  class="list-unstyled mb-3 small"></ul>
+
+                                {{-- 入力フォーム（デモ） --}}
+                                <form  class="d-flex gap-2 align-items-start" action="#"
+                                    method="POST">
+                                    <input type="text" name="author" class="form-control" placeholder="名前（任意）"
+                                        style="max-width: 160px;">
+                                    <input type="text" name="text" class="form-control" placeholder="コメントを入力…">
+                                    <button type="submit" class="btn btn-primary">送信</button>
+                                </form>
+                                <div class="form-text mt-2">※デモのため、送信してもサーバ保存はされません。</div>
+                            </div>
+
                 </article>
                 @endforeach
 
