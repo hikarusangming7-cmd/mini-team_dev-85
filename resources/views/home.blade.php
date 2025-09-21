@@ -15,6 +15,11 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+                    <div class="mt-3">
+                        <a href="{{ route('posts.index') }}" class="btn btn-primary">
+                            日記を使ってみる▶
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

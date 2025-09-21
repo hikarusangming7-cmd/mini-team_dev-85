@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PostController;
 
@@ -16,24 +15,8 @@ use App\Http\Controllers\PostController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-Route::get('/posts', function () {
-    return view('posts.index');   // resources/views/posts/index.blade.php
-});
-
-Route::get('/posts/create', function () {
-    return view('posts.create');  // resources/views/posts/create.blade.php
-});
-
-Route::get('/posts/edit', function () {
-    return view('posts.edit');  // resources/views/posts/create.blade.php
-});
-
-Route::get('/posts/show', function () {
-    return view('posts.show');  // resources/views/posts/create.blade.php
+Route::get('/', function () {
+    return view('welcome');
 });
 
 
@@ -48,3 +31,8 @@ Route::get('/posts/create', [PostController::class, 'create'])->name('posts.crea
 
 Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
 
+Route::get('/posts/edit/{id}', [PostController::class, 'edit'])->name('posts.edit');
+
+Route::put('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
+
+Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
