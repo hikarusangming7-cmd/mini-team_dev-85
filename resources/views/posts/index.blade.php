@@ -117,7 +117,7 @@
                 </article>
                 @endforeach
 
-                <nav aria-label="pagination demo" class="d-flex justify-content-center">
+                {{-- <nav aria-label="pagination demo" class="d-flex justify-content-center">
                     <ul class="pagination">
                         <li class="page-item disabled"><span class="page-link">«</span></li>
                         <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
@@ -125,7 +125,7 @@
                         <li class="page-item"><a class="page-link" href="#">3</a></li>
                         <li class="page-item"><a class="page-link" href="#">»</a></li>
                     </ul>
-                </nav>
+                </nav> --}}
             </div>
         </div>
     </main>
