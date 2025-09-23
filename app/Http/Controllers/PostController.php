@@ -8,90 +8,71 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['index']);
     }
 
     public function index()
     {
-        $posts = Post::all();
+        $posts = Post::with(['user:id,name'])
+            ->withCount('comments')
+            ->latest()
+            ->get();
+
         return view('posts.index', ['posts' => $posts]);
     }
 
-    public function create()
-    {
-        return view('posts.create');
-    }
+    public function create() { return view('posts.create'); }
 
     public function store(Request $request)
     {
-        // バリデーション
         $request->validate([
             'title' => 'required|string|max:30',
-            'body' => 'required|string|max:140',
+            'body'  => 'required|string|max:140',
             'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // ストレージに保存（storage/app/public/photos に保存）
-        $image_path = null;
-        if ($request->hasFile('photo')) {
-            $image_path = $request->file('photo')->store('photos', 'public');
-        }
-
-
-        // DBに保存
+        $image_path = $request->file('photo')->store('photos', 'public');
 
         $post = new Post();
-        $post->title = $request->title;
-        $post->body = $request->body;
-        $post->image_path  = $image_path;
-        $post->user_id = Auth::id();
-
-        $post->save();
+        $post->fill([
+            'title'      => $request->title,
+            'body'       => $request->body,
+            'image_path' => $image_path,
+            'user_id'    => Auth::id(),
+        ])->save();
 
         return redirect()->route('posts.index')->with('success', '投稿しました！');
     }
 
-    public function edit($id)
+    public function edit($id)   { return view('posts.edit', ['post' => Post::findOrFail($id)]); }
+    public function update(Request $req, $id)
     {
-        $post = Post::find($id);
-
-        return view('posts.edit', ['post' => $post]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $post = Post::find($id);
-        // バリデーション
-        $request->validate([
+        $post = Post::findOrFail($id);
+        $req->validate([
             'title' => 'required|string|max:30',
-            'body' => 'required|string|max:140',
+            'body'  => 'required|string|max:140',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // ストレージに保存（storage/app/public/photos に保存）
         $image_path = $post->image_path;
-        if ($request->hasFile('photo')) {
-            $image_path = $request->file('photo')->store('photos', 'public');
+        if ($req->hasFile('photo')) {
+            $image_path = $req->file('photo')->store('photos', 'public');
         }
 
-        $post->title = $request->title;
-        $post->body = $request->body;
-        $post->image_path = $image_path;
-
-        $post->save();
+        $post->update([
+            'title'      => $req->title,
+            'body'       => $req->body,
+            'image_path' => $image_path,
+        ]);
 
         return redirect()->route('posts.index')->with('success', '更新しました！');
     }
 
     public function destroy($id)
     {
-        $post = Post::find($id);
-
-        $post->delete();
-
+        Post::findOrFail($id)->delete();
         return redirect()->route('posts.index');
     }
 }
