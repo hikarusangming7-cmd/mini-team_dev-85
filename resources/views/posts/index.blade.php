@@ -102,8 +102,7 @@
                                     <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
                                         aria-expanded="false"
                                         >
-                                        💬 コメント <span
-                                            class="badge text-bg-secondary align-middle ms-1">0</span>
+                                        💬 コメント <span class="badge text-bg-secondary align-middle ms-1">0</span>
                                     </button>
 
                                     <button class="like-btn btn btn-sm {{ $post->bookmarks->contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
@@ -143,6 +142,7 @@
             </div>
         </main>
 
+        @push('styles')
         <style>
             @media (max-width: 576px) {
 
@@ -185,6 +185,7 @@
             }
 
         </style>
+        @endpush
 
         {{-- コメントのデモ挙動（追加・件数更新） --}}
         {{-- <script>
