@@ -20,22 +20,20 @@ class PostController extends Controller
     {
         $keyword = $request->input('q');
         $sort = $request->input('sort', 'new');
+        $filter = $request->input('filter'); // ← 新規
 
         $posts = Post::query()
             ->when($keyword, function ($q) use ($keyword) {
                 $q->where(function ($query) use ($keyword) {
-                    $query->where('title', 'like', '%' . $keyword . '%')
-                        ->orWhere('body', 'like', '%' . $keyword . '%')
-                        ->orWhereHas('user', function ($q2) use ($keyword) {
-                            $q2->where('name', 'like', '%' . $keyword . '%');
-                        });
+                    $query->where('title', 'like', "%{$keyword}%")
+                        ->orWhere('body', 'like', "%{$keyword}%")
+                        ->orWhereHas('user', fn($q2) => $q2->where('name', 'like', "%{$keyword}%"));
                 });
             })
-            ->when($sort === 'old', fn($q) => $q->orderBy('updated_at', 'asc'),
-                                fn($q) => $q->orderBy('updated_at', 'desc'))
+            ->when($filter === 'bookmarked', fn($q) => $q->whereHas('bookmarks', fn($q2) => $q2->where('user_id', Auth::id())))
+            ->when($sort === 'old', fn($q) => $q->orderBy('updated_at', 'asc'), fn($q) => $q->orderBy('updated_at', 'desc'))
             ->get();
 
-        // ビューに渡す
         return view('posts.index', ['posts' => $posts]);
     }
 
