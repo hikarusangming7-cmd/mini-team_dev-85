@@ -60,7 +60,6 @@
         <div id="cmt_{{ $post->id }}" class="collapse px-3 pb-3">
           <ul class="list-unstyled mb-3 small" id="cmtList-{{ $post->id }}"></ul>
 
-          {{-- JSが無くても正しいURLへ飛ぶように action/method は付けておく --}}
           <form class="d-flex gap-2 align-items-start js-cmt-form"
                 data-post-id="{{ $post->id }}"
                 action="{{ route('posts.comments.store', $post) }}"
@@ -91,46 +90,46 @@
 (() => {
   const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-  // 初回展開時に一覧をロード
+  // 「開いた時」に初回ロード（無駄なGETを避ける）
   document.querySelectorAll('.js-cmt-toggle').forEach(btn => {
-    btn.addEventListener('click', () => loadComments(btn.dataset.postId));
+    const target = document.querySelector(btn.dataset.bsTarget || btn.getAttribute('data-bs-target'));
+    if (!target) return;
+    target.addEventListener('shown.bs.collapse', () => loadComments(btn.dataset.postId));
   });
 
-  // 送信（ページ遷移しない）
-  document.querySelectorAll('.js-cmt-form').forEach(form => {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const postId = form.dataset.postId;
-      const listEl = document.getElementById('cmtList-' + postId);
+  // 送信（リロードしない）— イベント委譲で重複防止
+  document.addEventListener('submit', async (e) => {
+    const form = e.target;
+    if (!form.classList.contains('js-cmt-form')) return;
+    e.preventDefault();
 
-      const body   = form.querySelector('input[name="body"]').value.trim();
-      const author = form.querySelector('input[name="author_name"]').value.trim();
-      if (!body) return;
+    const postId = form.dataset.postId;
+    const listEl = document.getElementById('cmtList-' + postId);
+    const body   = form.querySelector('input[name="body"]').value.trim();
+    const author = form.querySelector('input[name="author_name"]').value.trim();
+    if (!body) return;
 
-      try {
-        const res = await fetch(`/posts/${postId}/comments`, {
-          method: 'POST',
-          headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ body, author_name: author })
-        });
-        if (!res.ok) throw new Error('failed to post');
+    try {
+      const res = await fetch(`/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ body, author_name: author })
+      });
+      if (!res.ok) throw new Error('failed to post');
+      const data  = await res.json();
+      const badge = document.getElementById('cmtCount-' + postId);
 
-        const data  = await res.json();               // {comment, total}
-        const badge = document.getElementById('cmtCount-' + postId);
-
-        if (!listEl.dataset.loaded) {
-          await loadComments(postId, true);           // 未ロードなら全件読み込み
-        } else {
-          appendComment(listEl, data.comment);        // ロード済なら1件だけ追加
-        }
-
-        if (badge && typeof data.total === 'number') badge.textContent = data.total;
-        form.querySelector('input[name="body"]').value = '';
-      } catch (e) {
-        console.error(e);
-        alert('コメントの投稿に失敗しました');
+      if (!listEl.dataset.loaded) {
+        await loadComments(postId, true);
+      } else {
+        appendComment(listEl, data.comment);
       }
-    });
+      if (badge && typeof data.total === 'number') badge.textContent = data.total;
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      alert('コメントの投稿に失敗しました');
+    }
   });
 
   async function loadComments(postId, force = false) {
@@ -141,10 +140,9 @@
     try {
       const res = await fetch(`/posts/${postId}/comments`, { headers: { 'Accept': 'application/json' } });
       if (!res.ok) throw new Error('failed to load');
-      const data = await res.json();
-
-      const comments = Array.isArray(data) ? data : (data.comments || []);
-      const total    = Array.isArray(data) ? comments.length : (data.total ?? comments.length);
+      const data      = await res.json();
+      const comments  = Array.isArray(data) ? data : (data.comments || []);
+      const total     = Array.isArray(data) ? comments.length : (data.total ?? comments.length);
 
       listEl.innerHTML = '';
       comments.forEach(c => appendComment(listEl, c));
@@ -173,4 +171,3 @@
 })();
 </script>
 @endpush
-
