@@ -1,40 +1,39 @@
+
     @extends('layouts.app')
     @section('toolbar')
         <form class="row g-2 align-items-center" method="GET" action="{{ route('posts.index') }}">
-    {{-- 検索キーワード --}}
-    <div class="col-12 col-md">
-        <div class="input-group">
-            <span class="input-group-text">🔎</span>
-            <input type="search" name="q" value="{{ request('q') }}" class="form-control"
-                placeholder="キーワードで探す（投稿者名、タイトル　など）">
-        </div>
-    </div>
+          {{-- 検索キーワード --}}
+          <div class="col-12 col-md">
+              <div class="input-group">
+                  <span class="input-group-text">🔎</span>
+                  <input type="search" name="q" value="{{ request('q') }}" class="form-control"
+                      placeholder="キーワードで探す（投稿者名、タイトル　など）">
 
-    {{-- 並び替え --}}
-    <div class="col-6 col-md-auto">
-        <select name="sort" class="form-select" onchange="this.form.submit()">
-            <option value="new" {{ request('sort', 'new') === 'new' ? 'selected' : '' }}>新しい順</option>
-            <option value="old" {{ request('sort') === 'old' ? 'selected' : '' }}>古い順</option>
-        </select>
-    </div>
+          {{-- 並び替え --}}
+          <div class="col-6 col-md-auto">
+              <select name="sort" class="form-select" onchange="this.form.submit()">
+                  <option value="new" {{ request('sort', 'new') === 'new' ? 'selected' : '' }}>新しい順</option>
+                  <option value="old" {{ request('sort') === 'old' ? 'selected' : '' }}>古い順</option>
+              </select>
+          </div>
 
-    {{-- hidden で filter を保持 --}}
-    <input type="hidden" name="filter" value="{{ request('filter') }}">
+          {{-- hidden で filter を保持 --}}
+          <input type="hidden" name="filter" value="{{ request('filter') }}">
 
-    {{-- ボタン群 --}}
-    <div class="col-6 col-md-auto d-flex gap-2">
-        @php($filterActive = request('filter') === 'bookmarked')
-        <button
-            type="submit"
-            name="filter"
-            value="{{ $filterActive ? '' : 'bookmarked' }}"
-            class="btn btn-bookmark {{ $filterActive ? 'active' : '' }}">
-            ♡
-        </button>
-        <button class="btn btn-primary" type="submit">検索</button>
-        <a class="btn btn-outline-secondary" href="{{ url()->current() }}">リセット</a>
-    </div>
-</form>
+          {{-- ボタン群 --}}
+          <div class="col-6 col-md-auto d-flex gap-2">
+              @php($filterActive = request('filter') === 'bookmarked')
+              <button
+                  type="submit"
+                  name="filter"
+                  value="{{ $filterActive ? '' : 'bookmarked' }}"
+                  class="btn btn-bookmark {{ $filterActive ? 'active' : '' }}">
+                  ♡
+              </button>
+              <button class="btn btn-primary" type="submit">検索</button>
+              <a class="btn btn-outline-secondary" href="{{ url()->current() }}">リセット</a>
+          </div>
+       </form>
     @endsection
 
     @section('content')
@@ -92,55 +91,46 @@
                             @endif
                             <p class="card-text">{{ $post->body }}</p>
                         </div>
+                        <div class="d-flex align-items-center gap-3 px-3 pb-3">
+                            <button class="btn btn-sm btn-outline-secondary js-cmt-toggle"　type="button"
+                               data-bs-toggle="collapse"　data-bs-target="#cmt_{{ $post->id }}"
+                               data-post-id="{{ $post->id }}">
+                              💬 コメント
+                             　 <span class="badge text-bg-secondary align-middle ms-1" id="cmtCount-{{ $post->id }}">
+                                　{{ $post->comments_count ?? 0 }}
+                              　</span>
+                            </button>
+                            <button class="like-btn btn btn-sm {{ $post->bookmarks->
+                              contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
+                              data-post-id="{{ $post->id }}">♡ <span class="like-count">{{ $post->bookmarks->count() }}</span>
+                            </button>
+                       　</div>
 
-                        {{-- アクション行：コメントボタンで入力欄を開閉 --}}
-                                <div class="d-flex align-items-center gap-3">
-                                    {{-- <a href="#" class="btn btn-sm btn-outline-primary disabled" tabindex="-1"
-                                        aria-disabled="true">詳細を見る（デモ）</a> --}}
+                         <div id="cmt_{{ $post->id }}" class="collapse px-3 pb-3">
+                           <ul class="list-unstyled mb-3 small" id="cmtList-{{ $post->id }}"></ul>
 
-                                    {{-- コメントボタン（件数バッジ付き） --}}
-                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
-                                        aria-expanded="false"
-                                        >
-                                        💬 コメント <span class="badge text-bg-secondary align-middle ms-1">0</span>
-                                    </button>
+                           <form class="d-flex gap-2 align-items-start js-cmt-form"
+                                  data-post-id="{{ $post->id }}"
+                                  action="{{ route('posts.comments.store', $post) }}"
+                                  method="POST">
+                              @csrf
+                              <input type="text" name="author_name" class="form-control" placeholder="名前（任意）" style="max-width:160px;">
+                              <input type="text" name="body" class="form-control" placeholder="コメントを入力…">
+                              <button type="submit" class="btn btn-primary">送信</button>
+                           </form>
 
-                                    <button class="like-btn btn btn-sm {{ $post->bookmarks->contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
-                                    data-post-id="{{ $post->id }}">♡ <span class="like-count">{{ $post->bookmarks->count() }}</span>
-                                    </button>
-                                </div>
 
-                                {{-- コメント欄（折りたたみ） --}}
-                                <div  class="collapse mt-3">
-                                    {{-- 既存コメント一覧（デモでは空から） --}}
-                                    <ul  class="list-unstyled mb-3 small"></ul>
+                         <div class="form-text mt-2">※ページ遷移せずに投稿・表示されます。</div>
 
-                                    {{-- 入力フォーム（デモ） --}}
-                                    <form  class="d-flex gap-2 align-items-start" action="#"
-                                        method="POST">
-                                        <input type="text" name="author" class="form-control" placeholder="名前（任意）"
-                                            style="max-width: 160px;">
-                                        <input type="text" name="text" class="form-control" placeholder="コメントを入力…">
-                                        <button type="submit" class="btn btn-primary">送信</button>
-                                    </form>
-                                    <div class="form-text mt-2">※デモのため、送信してもサーバ保存はされません。</div>
-                                </div>
+                        
+                     　</div>
 
                     </article>
                     @endforeach
-
-                    {{-- <nav aria-label="pagination demo" class="d-flex justify-content-center">
-                        <ul class="pagination">
-                            <li class="page-item disabled"><span class="page-link">«</span></li>
-                            <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">»</a></li>
-                        </ul>
-                    </nav> --}}
                 </div>
             </div>
         </main>
+        @endsection
 
         @push('styles')
         <style>
@@ -186,52 +176,8 @@
 
         </style>
         @endpush
-
-        {{-- コメントのデモ挙動（追加・件数更新） --}}
-        {{-- <script>
-            (() => {
-                // 投稿単位で「フォーム送信 → リストへ追加 → 件数更新」
-                document.querySelectorAll('form[id^="cmtForm_"]').forEach(form => {
-                    form.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        const postId = form.id.replace('cmtForm_', '');
-                        const list = document.getElementById('cmtList_' + postId);
-                        const countTag = document.getElementById('cmtCount_' + postId);
-                        const author = (form.querySelector('input[name="author"]').value || '名無しさん').trim();
-                        const text = (form.querySelector('input[name="text"]').value || '').trim();
-                        if (!text) return;
-
-                        const li = document.createElement('li');
-                        li.className = 'comment-item mb-2';
-                        const now = new Date();
-                        const hh = now.getHours().toString().padStart(2, '0');
-                        const mm = now.getMinutes().toString().padStart(2, '0');
-
-                        li.innerHTML = `
-            <div class="comment-meta small mb-1">${author} ・ ${hh}:${mm}</div>
-            <div>${escapeHtml(text)}</div>
-        `;
-                        list.appendChild(li);
-
-                        // 件数更新
-                        countTag.textContent = (parseInt(countTag.textContent, 10) || 0) + 1;
-
-                        // 入力クリア
-                        form.querySelector('input[name="text"]').value = '';
-                    });
-                });
-
-                function escapeHtml(str) {
-                    return str.replace(/[&<>"']/g, s => ({
-                        '&': '&amp;',
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        '"': '&quot;',
-                        "'": '&#39;'
-                    } [s]));
-                }
-            })();
-        </script> --}}
+        
+        @push('script1')
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 document.querySelectorAll(".like-btn").forEach(function (btn) {
@@ -267,4 +213,92 @@
             });
 
         </script>
-    @endsection
+         @endpush
+        
+
+        @push('script2')
+        <script>
+        (() => {
+          const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+          // 「開いた時」に初回ロード（無駄なGETを避ける）
+          document.querySelectorAll('.js-cmt-toggle').forEach(btn => {
+            const target = document.querySelector(btn.dataset.bsTarget || btn.getAttribute('data-bs-target'));
+            if (!target) return;
+            target.addEventListener('shown.bs.collapse', () => loadComments(btn.dataset.postId));
+          });
+
+          // 送信（リロードしない）— イベント委譲で重複防止
+          document.addEventListener('submit', async (e) => {
+            const form = e.target;
+            if (!form.classList.contains('js-cmt-form')) return;
+            e.preventDefault();
+
+            const postId = form.dataset.postId;
+            const listEl = document.getElementById('cmtList-' + postId);
+            const body   = form.querySelector('input[name="body"]').value.trim();
+            const author = form.querySelector('input[name="author_name"]').value.trim();
+            if (!body) return;
+
+            try {
+              const res = await fetch(`/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ body, author_name: author })
+              });
+              if (!res.ok) throw new Error('failed to post');
+              const data  = await res.json();
+              const badge = document.getElementById('cmtCount-' + postId);
+
+              if (!listEl.dataset.loaded) {
+                await loadComments(postId, true);
+              } else {
+                appendComment(listEl, data.comment);
+              }
+              if (badge && typeof data.total === 'number') badge.textContent = data.total;
+              form.reset();
+            } catch (err) {
+              console.error(err);
+              alert('コメントの投稿に失敗しました');
+            }
+          });
+
+          async function loadComments(postId, force = false) {
+            const listEl = document.getElementById('cmtList-' + postId);
+            if (!listEl) return;
+            if (listEl.dataset.loaded && !force) return;
+
+            try {
+              const res = await fetch(`/posts/${postId}/comments`, { headers: { 'Accept': 'application/json' } });
+              if (!res.ok) throw new Error('failed to load');
+              const data      = await res.json();
+              const comments  = Array.isArray(data) ? data : (data.comments || []);
+              const total     = Array.isArray(data) ? comments.length : (data.total ?? comments.length);
+
+              listEl.innerHTML = '';
+              comments.forEach(c => appendComment(listEl, c));
+              listEl.dataset.loaded = '1';
+
+              const badge = document.getElementById('cmtCount-' + postId);
+              if (badge) badge.textContent = total;
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
+          function appendComment(listEl, c) {
+            const li = document.createElement('li');
+            li.className = 'comment-item mb-2';
+            li.innerHTML = `
+              <div class="comment-meta small mb-1">${escapeHtml(c.name)} ・ ${escapeHtml(c.time)}</div>
+              <div>${escapeHtml(c.body)}</div>
+            `;
+            listEl.prepend(li);
+          }
+
+          function escapeHtml(str = '') {
+            return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+          }
+        })();
+        </script>
+        @endpush
