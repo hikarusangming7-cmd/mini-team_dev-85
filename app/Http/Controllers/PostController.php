@@ -13,14 +13,33 @@ class PostController extends Controller
         $this->middleware('auth')->except(['index']);
     }
 
-    public function index()
-    {
-        $posts = Post::with(['user:id,name'])
-            ->withCount('comments')
-            ->latest()
-            ->get();
 
-        return view('posts.index', ['posts' => $posts]);
+
+    public function index(Request $request)
+    {
+    $keyword = $request->input('q');
+    $sort = $request->input('sort', 'new');
+    $filter = $request->input('filter');
+
+    $posts = Post::with(['user:id,name'])
+        ->withCount('comments')
+        ->when($keyword, function ($q) use ($keyword) {
+            $q->where(function ($query) use ($keyword) {
+                $query->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('body', 'like', "%{$keyword}%")
+                    ->orWhereHas('user', fn($q2) => $q2->where('name', 'like', "%{$keyword}%"));
+            });
+        })
+        ->when($filter === 'bookmarked', fn($q) =>
+            $q->whereHas('bookmarks', fn($q2) => $q2->where('user_id', Auth::id()))
+        )
+        ->when($sort === 'old',
+            fn($q) => $q->orderBy('updated_at', 'asc'),
+            fn($q) => $q->orderBy('updated_at', 'desc')
+        )
+        ->get();
+
+    return view('posts.index', ['posts' => $posts]);
     }
 
     public function create() { return view('posts.create'); }
