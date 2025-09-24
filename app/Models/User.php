@@ -31,6 +31,9 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\Comment::class);
     }
 
-    // 不要な自己参照は削除
-    // public function user() { return $this->belongsTo('App\Models\User'); }
+    public function bookmarks()
+    {
+        return $this->hasMany('App\Models\Bookmark');
+    }
+
 }

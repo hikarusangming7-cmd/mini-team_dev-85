@@ -70,6 +70,7 @@
             <button type="submit" class="btn btn-primary">送信</button>
           </form>
 
+
           <div class="form-text mt-2">※ページ遷移せずに投稿・表示されます。</div>
         </div>
       </article>
@@ -78,11 +79,63 @@
   </div>
 </main>
 
-<style>
-@media (max-width: 576px) { .card-img-top { max-height: 65vh !important; } }
-.comment-item { background:#f8f9fa; border-radius:.5rem; padding:.5rem .75rem; }
-.comment-meta { color:#6c757d; }
-</style>
+
+    <style>
+        @media (max-width: 576px) {
+
+            .card-img-top,
+            .carousel .carousel-item img {
+                max-height: 65vh !important;
+            }
+        }
+
+        .comment-item {
+            background: #f8f9fa;
+            border-radius: .5rem;
+            padding: .5rem .75rem;
+        }
+
+        .comment-meta {
+            color: #6c757d;
+        }
+
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".like-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    const postId = btn.dataset.postId;
+                    const countSpan = btn.querySelector(".like-count");
+                    const liked = btn.classList.contains("btn-danger");
+                    const url = liked
+                        ? `/posts/${postId}/bookmark`
+                        : `/posts/${postId}/bookmark`;
+
+                    fetch(url, {
+                        method: liked ? "DELETE" : "POST",
+                        headers: {
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                            "Accept": "application/json",
+                        },
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        countSpan.textContent = data.count;
+
+                        if (liked) {
+                            btn.classList.remove("btn-danger");
+                            btn.classList.add("btn-outline-secondary");
+                        } else {
+                            btn.classList.remove("btn-outline-secondary");
+                            btn.classList.add("btn-danger");
+                        }
+                    });
+                });
+            });
+        });
+
+    </script>
 @endsection
 
 @push('scripts')
