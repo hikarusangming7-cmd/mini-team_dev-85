@@ -48,7 +48,7 @@
 
             <div class="mt-4 d-flex justify-content-end gap-2">
               <a href="{{ route('posts.index') }}" class="btn btn-outline-secondary">キャンセル</a>
-              <button type="submit" class="btn btn-success">更新する</button>
+              <button type="submit" class="btn btn-success" href="{{ route('posts.index') }}">更新する</button>
             </div>
           </form>
         </div>

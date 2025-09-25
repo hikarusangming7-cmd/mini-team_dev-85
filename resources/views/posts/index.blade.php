@@ -10,9 +10,9 @@
         placeholder="キーワードで探す（投稿者名、タイトル など）">
 
         {{-- 並び替え --}}
-        <div class="col-6 col-md-auto">
+        <div class="col-6 col-md-auto" style="margin: 0 10px">
             <select name="sort" class="form-select" onchange="this.form.submit()">
-                <option value="new" {{ request('sort', 'new') === 'new' ? 'selected' : '' }}>新しい順</option>
+                <option value="new" {{ request('sort', 'new') === 'new' ? 'selected' : '' }} >新しい順</option>
                 <option value="old" {{ request('sort') === 'old' ? 'selected' : '' }}>古い順</option>
             </select>
         </div>
