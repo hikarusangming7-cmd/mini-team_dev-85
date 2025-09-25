@@ -16,7 +16,6 @@ return new class extends Migration
     $table->id();
     $table->foreignId('post_id')->constrained()->cascadeOnDelete(); // 親Post削除で道連れ
     $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete(); // ユーザー削除でNULL
-    $table->string('author_name')->nullable(); // 未ログイン時の表示名
     $table->text('body'); // ← ここを text に
     $table->timestamps();
 });

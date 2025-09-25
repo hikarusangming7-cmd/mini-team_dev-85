@@ -113,13 +113,10 @@
                                 action="{{ route('posts.comments.store', $post) }}"
                                 method="POST">
                             @csrf
-                            <input type="text" name="author_name" class="form-control" placeholder="名前（任意）" style="max-width:160px;">
+                            {{-- <input type="text" name="author_name" class="form-control" placeholder="名前" style="max-width:160px;"> --}}
                         <input type="text" name="body" class="form-control" placeholder="コメントを入力…">
-                        <button type="submit" class="btn btn-primary">送信</button>
+                        <button type="submit" class="btn btn-primary" style="height: 36.36px; display:inline-block; writing-mode:horizontal-tb; transform:none; white-space:nowrap;">送信</button>
                         </form>
-
-
-                        <div class="form-text mt-2">※ページ遷移せずに投稿・表示されます。</div>
 
 
                     </div>
@@ -184,9 +181,7 @@
                         const postId = btn.dataset.postId;
                         const countSpan = btn.querySelector(".like-count");
                         const liked = btn.classList.contains("btn-danger");
-                        const url = liked
-                            ? `/posts/${postId}/bookmark`
-                            : `/posts/${postId}/bookmark`;
+                        const url = `/posts/${postId}/bookmark`;
 
                         fetch(url, {
                             method: liked ? "DELETE" : "POST",
@@ -195,10 +190,12 @@
                                 "Accept": "application/json",
                             },
                         })
-                        .then(res => res.json())
+                        .then(res => {
+                            if (!res.ok) throw new Error('Network response was not ok');
+                            return res.json();
+                        })
                         .then(data => {
                             countSpan.textContent = data.count;
-
                             if (liked) {
                                 btn.classList.remove("btn-danger");
                                 btn.classList.add("btn-outline-secondary");
@@ -206,93 +203,120 @@
                                 btn.classList.remove("btn-outline-secondary");
                                 btn.classList.add("btn-danger");
                             }
-                        });
+                        })
+                        .catch(err => console.error(err));
                     });
                 });
             });
 
+            // コメント周り（IIFE）
             (() => {
-          const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-          // 「開いた時」に初回ロード（無駄なGETを避ける）
-          document.querySelectorAll('.js-cmt-toggle').forEach(btn => {
-            const target = document.querySelector(btn.dataset.bsTarget || btn.getAttribute('data-bs-target'));
-            if (!target) return;
-            target.addEventListener('shown.bs.collapse', () => loadComments(btn.dataset.postId));
-          });
+                // ——— プリロード関数 ———
+                function preloadComments() {
+                    // コメントボタンが付いている投稿だけプリロードする
+                    document.querySelectorAll('.js-cmt-toggle').forEach(btn => {
+                        const postId = btn.dataset.postId;
+                        if (!postId) return;
+                        const listEl = document.getElementById('cmtList-' + postId);
+                        if (listEl && !listEl.dataset.loaded) {
+                            // force=true で強制ロード（初回プリロード）
+                            loadComments(postId, true).catch(e => console.error(e));
+                        }
+                    });
+                }
 
-          // 送信（リロードしない）— イベント委譲で重複防止
-          document.addEventListener('submit', async (e) => {
-            const form = e.target;
-            if (!form.classList.contains('js-cmt-form')) return;
-            e.preventDefault();
+                // DOM の状態に応じて即時 or 後でプリロード
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', preloadComments);
+                } else {
+                    preloadComments();
+                }
 
-            const postId = form.dataset.postId;
-            const listEl = document.getElementById('cmtList-' + postId);
-            const body   = form.querySelector('input[name="body"]').value.trim();
-            const author = form.querySelector('input[name="author_name"]').value.trim();
-            if (!body) return;
+                // 「開いた時」にもフォールバックで読み込む（既に loaded なら実際の再取得はしない）
+                document.querySelectorAll('.js-cmt-toggle').forEach(btn => {
+                    const target = document.querySelector(btn.dataset.bsTarget || btn.getAttribute('data-bs-target'));
+                    if (!target) return;
+                    target.addEventListener('shown.bs.collapse', () => loadComments(btn.dataset.postId));
+                });
 
-            try {
-              const res = await fetch(`/posts/${postId}/comments`, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                body: JSON.stringify({ body, author_name: author })
-              });
-              if (!res.ok) throw new Error('failed to post');
-              const data  = await res.json();
-              const badge = document.getElementById('cmtCount-' + postId);
+                // 送信（リロードしない）— イベント委譲で重複防止
+                document.addEventListener('submit', async (e) => {
+                    const form = e.target;
+                    if (!form.classList.contains('js-cmt-form')) return;
+                    e.preventDefault();
 
-              if (!listEl.dataset.loaded) {
-                await loadComments(postId, true);
-              } else {
-                appendComment(listEl, data.comment);
-              }
-              if (badge && typeof data.total === 'number') badge.textContent = data.total;
-              form.reset();
-            } catch (err) {
-              console.error(err);
-              alert('コメントの投稿に失敗しました');
-            }
-          });
+                    const postId = form.dataset.postId;
+                    const listEl = document.getElementById('cmtList-' + postId);
+                    const body   = form.querySelector('input[name="body"]').value.trim();
+                    if (!body) return;
 
-          async function loadComments(postId, force = false) {
-            const listEl = document.getElementById('cmtList-' + postId);
-            if (!listEl) return;
-            if (listEl.dataset.loaded && !force) return;
+                    try {
+                        const res = await fetch(`/posts/${postId}/comments`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ body })
+                        });
+                        if (!res.ok) throw new Error('failed to post');
+                        const data  = await res.json();
+                        const badge = document.getElementById('cmtCount-' + postId);
 
-            try {
-              const res = await fetch(`/posts/${postId}/comments`, { headers: { 'Accept': 'application/json' } });
-              if (!res.ok) throw new Error('failed to load');
-              const data      = await res.json();
-              const comments  = Array.isArray(data) ? data : (data.comments || []);
-              const total     = Array.isArray(data) ? comments.length : (data.total ?? comments.length);
+                        if (!listEl.dataset.loaded) {
+                            await loadComments(postId, true);
+                        } else {
+                            appendComment(listEl, data.comment);
+                        }
+                        if (badge && typeof data.total === 'number') badge.textContent = data.total;
+                        form.reset();
+                    } catch (err) {
+                        console.error(err);
+                        alert('コメントの投稿に失敗しました');
+                    }
+                });
 
-              listEl.innerHTML = '';
-              comments.forEach(c => appendComment(listEl, c));
-              listEl.dataset.loaded = '1';
+                // コメント取得（force=true でキャッシュ無視）
+                async function loadComments(postId, force = false) {
+                    const listEl = document.getElementById('cmtList-' + postId);
+                    if (!listEl) return;
+                    if (listEl.dataset.loaded && !force) return;
 
-              const badge = document.getElementById('cmtCount-' + postId);
-              if (badge) badge.textContent = total;
-            } catch (e) {
-              console.error(e);
-            }
-          }
+                    try {
+                        const res = await fetch(`/posts/${postId}/comments`, { headers: { 'Accept': 'application/json' } });
+                        if (!res.ok) throw new Error('failed to load');
+                        const data      = await res.json();
+                        const comments  = Array.isArray(data) ? data : (data.comments || []);
+                        const total     = Array.isArray(data) ? comments.length : (data.total ?? comments.length);
 
-          function appendComment(listEl, c) {
-            const li = document.createElement('li');
-            li.className = 'comment-item mb-2';
-            li.innerHTML = `
-              <div class="comment-meta small mb-1">${escapeHtml(c.name)} ・ ${escapeHtml(c.time)}</div>
-              <div>${escapeHtml(c.body)}</div>
-            `;
-            listEl.prepend(li);
-          }
+                        listEl.innerHTML = '';
+                        comments.forEach(c => appendComment(listEl, c));
+                        listEl.dataset.loaded = '1';
 
-          function escapeHtml(str = '') {
-            return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-          }
-        })();
+                        const badge = document.getElementById('cmtCount-' + postId);
+                        if (badge) badge.textContent = total;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+
+                function appendComment(listEl, c) {
+                    const li = document.createElement('li');
+                    li.className = 'comment-item mb-2';
+                    li.innerHTML = `
+                        <div class="comment-meta small mb-1">${escapeHtml(c.name)} ・ ${escapeHtml(c.time)}</div>
+                        <div>${escapeHtml(c.body)}</div>
+                    `;
+                    listEl.prepend(li);
+                }
+
+                function escapeHtml(str = '') {
+                    return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+                }
+            })();
 
         </script>
-         @endpush
+        @endpush
