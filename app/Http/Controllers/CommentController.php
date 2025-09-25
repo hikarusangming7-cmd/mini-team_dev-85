@@ -16,7 +16,7 @@ class CommentController extends Controller
             ->get()
             ->map(fn ($c) => [
                 'id'   => $c->id,
-                'name' => $c->user->name ?? ($c->author_name ?: '名無しさん'),
+                'name' => $c->user->name,
                 'body' => $c->body,
                 'time' => $c->created_at->diffForHumans(),
             ]);
