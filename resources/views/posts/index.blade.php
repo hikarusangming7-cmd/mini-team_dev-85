@@ -2,38 +2,38 @@
     @extends('layouts.app')
     @section('toolbar')
         <form class="row g-2 align-items-center" method="GET" action="{{ route('posts.index') }}">
-          {{-- 検索キーワード --}}
-          <div class="col-12 col-md">
-              <div class="input-group">
-                  <span class="input-group-text">🔎</span>
-                  <input type="search" name="q" value="{{ request('q') }}" class="form-control"
-                      placeholder="キーワードで探す（投稿者名、タイトル　など）">
+        {{-- 検索キーワード --}}
+        <div class="col-12 col-md">
+        <div class="input-group">
+        <span class="input-group-text">🔎</span>
+        <input type="search" name="q" value="{{ request('q') }}" class="form-control"
+        placeholder="キーワードで探す（投稿者名、タイトル など）">
 
-          {{-- 並び替え --}}
-          <div class="col-6 col-md-auto">
-              <select name="sort" class="form-select" onchange="this.form.submit()">
-                  <option value="new" {{ request('sort', 'new') === 'new' ? 'selected' : '' }}>新しい順</option>
-                  <option value="old" {{ request('sort') === 'old' ? 'selected' : '' }}>古い順</option>
-              </select>
-          </div>
+        {{-- 並び替え --}}
+        <div class="col-6 col-md-auto">
+            <select name="sort" class="form-select" onchange="this.form.submit()">
+                <option value="new" {{ request('sort', 'new') === 'new' ? 'selected' : '' }}>新しい順</option>
+                <option value="old" {{ request('sort') === 'old' ? 'selected' : '' }}>古い順</option>
+            </select>
+        </div>
 
-          {{-- hidden で filter を保持 --}}
-          <input type="hidden" name="filter" value="{{ request('filter') }}">
+        {{-- hidden で filter を保持 --}}
+        <input type="hidden" name="filter" value="{{ request('filter') }}">
 
-          {{-- ボタン群 --}}
-          <div class="col-6 col-md-auto d-flex gap-2">
-              @php($filterActive = request('filter') === 'bookmarked')
-              <button
-                  type="submit"
-                  name="filter"
-                  value="{{ $filterActive ? '' : 'bookmarked' }}"
-                  class="btn btn-bookmark {{ $filterActive ? 'active' : '' }}">
-                  ♡
-              </button>
-              <button class="btn btn-primary" type="submit">検索</button>
-              <a class="btn btn-outline-secondary" href="{{ url()->current() }}">リセット</a>
-          </div>
-       </form>
+        {{-- ボタン群 --}}
+        <div class="col-6 col-md-auto d-flex gap-2">
+            @php($filterActive = request('filter') === 'bookmarked')
+            <button
+                type="submit"
+                name="filter"
+                value="{{ $filterActive ? '' : 'bookmarked' }}"
+                class="btn btn-bookmark {{ $filterActive ? 'active' : '' }}">
+                ♡
+            </button>
+            <button class="btn btn-primary" type="submit">検索</button>
+            <a class="btn btn-outline-secondary" href="{{ url()->current() }}">リセット</a>
+        </div>
+    </form>
     @endsection
 
     @section('content')
@@ -92,38 +92,38 @@
                             <p class="card-text">{{ $post->body }}</p>
                         </div>
                         <div class="d-flex align-items-center gap-3 px-3 pb-3">
-                            <button class="btn btn-sm btn-outline-secondary js-cmt-toggle"　type="button"
-                               data-bs-toggle="collapse"　data-bs-target="#cmt_{{ $post->id }}"
-                               data-post-id="{{ $post->id }}">
-                              💬 コメント
-                             　 <span class="badge text-bg-secondary align-middle ms-1" id="cmtCount-{{ $post->id }}">
-                                　{{ $post->comments_count ?? 0 }}
-                              　</span>
+                            <button class="btn btn-sm btn-outline-secondary js-cmt-toggle" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#cmt_{{ $post->id }}"
+                            data-post-id="{{ $post->id }}">
+                            💬 コメント
+                            <span class="badge text-bg-secondary align-middle ms-1" id="cmtCount-{{ $post->id }}">
+                                {{ $post->comments_count ?? 0 }}
+                            </span>
                             </button>
                             <button class="like-btn btn btn-sm {{ $post->bookmarks->
-                              contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
-                              data-post-id="{{ $post->id }}">♡ <span class="like-count">{{ $post->bookmarks->count() }}</span>
+                            contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
+                            data-post-id="{{ $post->id }}">♡ <span class="like-count">{{ $post->bookmarks->count() }}</span>
                             </button>
-                       　</div>
+                        </div>
 
-                         <div id="cmt_{{ $post->id }}" class="collapse px-3 pb-3">
-                           <ul class="list-unstyled mb-3 small" id="cmtList-{{ $post->id }}"></ul>
+                        <div id="cmt_{{ $post->id }}" class="collapse px-3 pb-3">
+                        <ul class="list-unstyled mb-3 small" id="cmtList-{{ $post->id }}"></ul>
 
-                           <form class="d-flex gap-2 align-items-start js-cmt-form"
-                                  data-post-id="{{ $post->id }}"
-                                  action="{{ route('posts.comments.store', $post) }}"
-                                  method="POST">
-                              @csrf
-                              <input type="text" name="author_name" class="form-control" placeholder="名前（任意）" style="max-width:160px;">
-                              <input type="text" name="body" class="form-control" placeholder="コメントを入力…">
-                              <button type="submit" class="btn btn-primary">送信</button>
-                           </form>
+                        <form class="d-flex gap-2 align-items-start js-cmt-form"
+                                data-post-id="{{ $post->id }}"
+                                action="{{ route('posts.comments.store', $post) }}"
+                                method="POST">
+                            @csrf
+                            <input type="text" name="author_name" class="form-control" placeholder="名前（任意）" style="max-width:160px;">
+                        <input type="text" name="body" class="form-control" placeholder="コメントを入力…">
+                        <button type="submit" class="btn btn-primary">送信</button>
+                        </form>
 
 
-                         <div class="form-text mt-2">※ページ遷移せずに投稿・表示されます。</div>
+                        <div class="form-text mt-2">※ページ遷移せずに投稿・表示されます。</div>
 
-                        
-                     　</div>
+
+                    </div>
 
                     </article>
                     @endforeach
@@ -176,7 +176,7 @@
 
         </style>
         @endpush
-        
+
         @push('script1')
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -214,7 +214,7 @@
 
         </script>
          @endpush
-        
+
 
         @push('script2')
         <script>

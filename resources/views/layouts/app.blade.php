@@ -21,12 +21,15 @@
 
 </head>
 <body>
-  <div id="app">
-    {{-- 必要ならナビをここに --}}
     <main class="py-4">
-      @yield('content')
+        <div class="bg-white border-bottom">
+            <div class="container py-2">
+            @yield('toolbar')
+            </div>
+        </div>
+    @yield('content')
     </main>
-  </div>
-  @stack('scripts')
+</div>
+@stack('scripts')
 </body>
 </html>
