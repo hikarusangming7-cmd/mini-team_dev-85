@@ -100,9 +100,8 @@
                                 {{ $post->comments_count ?? 0 }}
                             </span>
                             </button>
-                            <button class="like-btn btn btn-sm {{ $post->bookmarks->
-                            contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
-                            data-post-id="{{ $post->id }}">♡ <span class="like-count">{{ $post->bookmarks->count() }}</span>
+                            <button class="like-btn btn btn-sm {{ $post->bookmarks->contains('user_id', Auth::id()) ? 'btn-danger' : 'btn-outline-secondary' }}"
+                                data-post-id="{{ $post->id }}">♡ <span class="like-count">{{ $post->bookmarks->count() }}</span>
                             </button>
                         </div>
 
@@ -177,7 +176,7 @@
         </style>
         @endpush
 
-        @push('script1')
+        @push('scripts')
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 document.querySelectorAll(".like-btn").forEach(function (btn) {
@@ -212,13 +211,7 @@
                 });
             });
 
-        </script>
-         @endpush
-
-
-        @push('script2')
-        <script>
-        (() => {
+            (() => {
           const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
           // 「開いた時」に初回ロード（無駄なGETを避ける）
@@ -300,5 +293,6 @@
             return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
           }
         })();
+
         </script>
-        @endpush
+         @endpush
